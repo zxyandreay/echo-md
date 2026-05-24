@@ -1,0 +1,1003 @@
+:root {
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+.app-shell {
+  --bg: #f4f6f8;
+  --bg-soft: #eef2f5;
+  --surface: #ffffff;
+  --surface-strong: #f9fafb;
+  --surface-muted: #f1f5f9;
+  --text: #18202b;
+  --text-strong: #0f1720;
+  --muted: #667085;
+  --faint: #8b96a7;
+  --border: #d9e1ea;
+  --border-strong: #c3ceda;
+  --accent: #0f766e;
+  --accent-strong: #115e59;
+  --accent-soft: #dff7f2;
+  --danger: #b42318;
+  --danger-soft: #fff0ed;
+  --shadow: 0 18px 50px rgb(15 23 42 / 10%);
+  --mono: 'SFMono-Regular', 'Cascadia Code', 'Roboto Mono', Consolas,
+    'Liberation Mono', monospace;
+  --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', sans-serif;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 78%), rgb(255 255 255 / 0%)),
+    var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.theme-dark {
+  --bg: #101417;
+  --bg-soft: #161c20;
+  --surface: #1b2227;
+  --surface-strong: #20282e;
+  --surface-muted: #151b20;
+  --text: #dce5ed;
+  --text-strong: #f7fafc;
+  --muted: #a8b3bd;
+  --faint: #7c8893;
+  --border: #2c363d;
+  --border-strong: #3b4851;
+  --accent: #2dd4bf;
+  --accent-strong: #5eead4;
+  --accent-soft: #103f3b;
+  --danger: #fb7185;
+  --danger-soft: #451a24;
+  --shadow: 0 18px 50px rgb(0 0 0 / 24%);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 4%), rgb(255 255 255 / 0%)),
+    var(--bg);
+}
+
+.topbar {
+  align-items: flex-start;
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  margin: 0 auto 22px;
+  max-width: 1440px;
+}
+
+.brand-cluster {
+  align-items: flex-start;
+  display: flex;
+  gap: 14px;
+}
+
+.brand-mark {
+  align-items: center;
+  background: var(--text-strong);
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgb(15 23 42 / 16%);
+  color: var(--surface);
+  display: grid;
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 1.2rem;
+  font-weight: 800;
+  height: 42px;
+  letter-spacing: 0;
+  place-items: center;
+  width: 42px;
+}
+
+.theme-dark .brand-mark {
+  background: #e9f8f5;
+  color: #10201f;
+}
+
+.brand-name {
+  color: var(--accent-strong);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.1;
+  margin: 0 0 6px;
+  text-transform: uppercase;
+}
+
+.topbar h1 {
+  color: var(--text-strong);
+  font-size: clamp(1.55rem, 2.3vw, 2.35rem);
+  font-weight: 780;
+  letter-spacing: 0;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.topbar p {
+  margin: 6px 0 0;
+}
+
+.brand-cluster p:last-child {
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.topbar-actions {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  max-width: 520px;
+}
+
+.approximation-note {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  text-align: right;
+}
+
+.icon-button,
+.layout-button {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 38px;
+  justify-content: center;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    background 160ms ease;
+  width: 38px;
+}
+
+.icon-button:hover,
+.layout-button:hover {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+  transform: translateY(-1px);
+}
+
+.icon-button:focus-visible,
+.layout-button:focus-visible,
+.tool-button:focus-visible,
+.platform-tab:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  outline-offset: 2px;
+}
+
+.command-bar {
+  align-items: stretch;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin: 0 auto 14px;
+  max-width: 1440px;
+}
+
+.platform-tabs {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(3, minmax(130px, 1fr));
+  padding: 4px;
+  width: min(100%, 620px);
+}
+
+.platform-tab {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--muted);
+  cursor: pointer;
+  min-height: 54px;
+  padding: 8px 12px;
+  text-align: left;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.platform-tab span {
+  color: inherit;
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 760;
+  line-height: 1.2;
+}
+
+.platform-tab small {
+  display: block;
+  font-size: 0.72rem;
+  line-height: 1.25;
+  margin-top: 3px;
+}
+
+.platform-tab[aria-selected='true'] {
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 24%, var(--border));
+  color: var(--accent-strong);
+}
+
+.toolbar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.tool-button {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 0.84rem;
+  font-weight: 720;
+  gap: 7px;
+  min-height: 38px;
+  padding: 0 12px;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    background 160ms ease;
+  white-space: nowrap;
+}
+
+.tool-button:hover {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+  transform: translateY(-1px);
+}
+
+.tool-button.danger {
+  color: var(--danger);
+}
+
+.tool-button.danger:hover {
+  background: var(--danger-soft);
+  border-color: color-mix(in srgb, var(--danger) 28%, var(--border));
+}
+
+.workspace-meta {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin: 0 auto 12px;
+  max-width: 1440px;
+}
+
+.layout-toggle {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+}
+
+.layout-button {
+  background: transparent;
+  border-radius: 6px;
+  height: 30px;
+  width: 30px;
+}
+
+.layout-button[aria-pressed='true'] {
+  background: var(--text-strong);
+  border-color: var(--text-strong);
+  color: var(--surface);
+}
+
+.status-text {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 650;
+  margin: 0;
+}
+
+.workspace {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.03fr);
+  margin: 0 auto;
+  max-width: 1440px;
+}
+
+.workspace.layout-editor,
+.workspace.layout-preview {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.panel-header {
+  align-items: center;
+  background: var(--surface-strong);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  min-height: 64px;
+  padding: 14px 16px;
+}
+
+.panel-header h2,
+.panel-header p {
+  margin: 0;
+}
+
+.panel-header h2 {
+  color: var(--text-strong);
+  font-size: 1rem;
+  font-weight: 780;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+
+.panel-header span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  text-align: right;
+}
+
+.panel-kicker {
+  color: var(--accent-strong);
+  font-size: 0.7rem;
+  font-weight: 820;
+  letter-spacing: 0;
+  line-height: 1.2;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.markdown-editor {
+  background: var(--surface);
+  border: 0;
+  color: var(--text);
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  line-height: 1.62;
+  min-height: min(68vh, 760px);
+  outline: none;
+  padding: 20px;
+  resize: vertical;
+  tab-size: 2;
+  width: 100%;
+}
+
+.markdown-editor::placeholder {
+  color: var(--faint);
+}
+
+.preview-scroll {
+  background: var(--bg-soft);
+  min-height: min(68vh, 760px);
+  overflow: auto;
+  padding: 20px;
+}
+
+.empty-preview {
+  align-items: center;
+  background: var(--surface);
+  border: 1px dashed var(--border-strong);
+  border-radius: 8px;
+  color: var(--muted);
+  display: grid;
+  min-height: 420px;
+  place-content: center;
+  text-align: center;
+}
+
+.empty-preview svg {
+  color: var(--accent);
+  justify-self: center;
+  margin-bottom: 12px;
+}
+
+.empty-preview h2 {
+  color: var(--text-strong);
+  font-size: 1.1rem;
+  margin: 0 0 6px;
+}
+
+.empty-preview p {
+  margin: 0;
+  max-width: 34ch;
+}
+
+.github-preview {
+  background: #ffffff;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  color: #1f2328;
+  min-height: 100%;
+  padding: 28px;
+}
+
+.markdown-body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans',
+    Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 0 auto;
+  max-width: 880px;
+}
+
+.markdown-body > :first-child,
+.reddit-markdown > :first-child,
+.discord-markdown > :first-child {
+  margin-top: 0;
+}
+
+.markdown-body > :last-child,
+.reddit-markdown > :last-child,
+.discord-markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body h1,
+.markdown-body h2 {
+  border-bottom: 1px solid #d8dee4;
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 24px 0 16px;
+  padding-bottom: 0.3em;
+}
+
+.markdown-body h1 {
+  font-size: 2em;
+}
+
+.markdown-body h2 {
+  font-size: 1.5em;
+}
+
+.markdown-body h3 {
+  font-size: 1.25em;
+  margin: 24px 0 16px;
+}
+
+.markdown-body p,
+.markdown-body blockquote,
+.markdown-body ul,
+.markdown-body ol,
+.markdown-body table,
+.markdown-body pre {
+  margin-bottom: 16px;
+  margin-top: 0;
+}
+
+.markdown-body a {
+  color: #0969da;
+  text-decoration: none;
+}
+
+.markdown-body a:hover {
+  text-decoration: underline;
+}
+
+.markdown-body blockquote {
+  border-left: 0.25em solid #d0d7de;
+  color: #57606a;
+  padding: 0 1em;
+}
+
+.markdown-body code {
+  background: rgb(175 184 193 / 20%);
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, SFMono-Regular, Consolas,
+    'Liberation Mono', Menlo, monospace;
+  font-size: 85%;
+  padding: 0.2em 0.4em;
+}
+
+.markdown-body pre {
+  background: #f6f8fa;
+  border-radius: 6px;
+  overflow: auto;
+  padding: 16px;
+}
+
+.markdown-body pre code {
+  background: transparent;
+  border-radius: 0;
+  display: block;
+  font-size: 85%;
+  line-height: 1.45;
+  padding: 0;
+}
+
+.markdown-body table {
+  border-collapse: collapse;
+  display: block;
+  overflow: auto;
+  width: max-content;
+  max-width: 100%;
+}
+
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid #d0d7de;
+  padding: 6px 13px;
+}
+
+.markdown-body tr {
+  background: #ffffff;
+  border-top: 1px solid #d8dee4;
+}
+
+.markdown-body tr:nth-child(2n) {
+  background: #f6f8fa;
+}
+
+.markdown-body hr {
+  background: #d8dee4;
+  border: 0;
+  height: 0.25em;
+  margin: 24px 0;
+  padding: 0;
+}
+
+.markdown-body img {
+  border-radius: 6px;
+  max-width: 100%;
+}
+
+.markdown-body input[type='checkbox'] {
+  margin: 0 0.45em 0.25em -1.4em;
+  vertical-align: middle;
+}
+
+.discord-preview {
+  background: #313338;
+  border: 1px solid #1e1f22;
+  border-radius: 8px;
+  color: #dbdee1;
+  min-height: 100%;
+  padding: 20px;
+}
+
+.discord-message {
+  align-items: flex-start;
+  display: flex;
+  gap: 14px;
+  margin: 0 auto;
+  max-width: 900px;
+}
+
+.discord-avatar {
+  align-items: center;
+  background: #23a559;
+  border-radius: 50%;
+  color: #ffffff;
+  display: flex;
+  flex: 0 0 auto;
+  font-size: 1rem;
+  font-weight: 800;
+  height: 42px;
+  justify-content: center;
+  margin-top: 2px;
+  width: 42px;
+}
+
+.discord-message-main {
+  min-width: 0;
+}
+
+.discord-meta {
+  align-items: baseline;
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.discord-name {
+  color: #f2f3f5;
+  font-weight: 720;
+}
+
+.discord-time {
+  color: #949ba4;
+  font-size: 0.75rem;
+}
+
+.discord-markdown {
+  color: #dbdee1;
+  font-family: 'gg sans', 'Noto Sans', 'Helvetica Neue', Helvetica, Arial,
+    sans-serif;
+  font-size: 1rem;
+  line-height: 1.38;
+}
+
+.discord-markdown h1,
+.discord-markdown h2,
+.discord-markdown h3,
+.discord-markdown h4 {
+  color: #f2f3f5;
+  font-size: 1rem;
+  font-weight: 760;
+  line-height: 1.3;
+  margin: 12px 0 4px;
+}
+
+.discord-markdown p,
+.discord-markdown ul,
+.discord-markdown ol,
+.discord-markdown pre,
+.discord-markdown blockquote {
+  margin-bottom: 10px;
+  margin-top: 0;
+}
+
+.discord-markdown ul,
+.discord-markdown ol {
+  padding-left: 22px;
+}
+
+.discord-markdown a {
+  color: #00a8fc;
+}
+
+.discord-markdown blockquote {
+  border-left: 4px solid #4e5058;
+  color: #dbdee1;
+  padding: 2px 0 2px 12px;
+}
+
+.discord-markdown code {
+  background: #2b2d31;
+  border: 1px solid #1e1f22;
+  border-radius: 4px;
+  color: #f2f3f5;
+  font-family: var(--mono);
+  font-size: 0.88em;
+  padding: 0.12em 0.3em;
+}
+
+.discord-markdown pre {
+  background: #2b2d31;
+  border: 1px solid #1e1f22;
+  border-radius: 4px;
+  overflow: auto;
+  padding: 10px;
+}
+
+.discord-markdown pre code {
+  background: transparent;
+  border: 0;
+  display: block;
+  line-height: 1.45;
+  padding: 0;
+}
+
+.discord-markdown table {
+  display: block;
+  font-family: var(--mono);
+  overflow: auto;
+  white-space: pre;
+}
+
+.inline-spoiler {
+  background: #202225;
+  border-radius: 3px;
+  color: transparent;
+  cursor: default;
+  padding: 0 0.25em;
+  transition:
+    color 140ms ease,
+    background 140ms ease;
+}
+
+.inline-spoiler:hover,
+.inline-spoiler:focus {
+  background: rgb(32 34 37 / 36%);
+  color: inherit;
+}
+
+.inline-underline {
+  text-decoration: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.16em;
+}
+
+.inline-strike {
+  text-decoration: line-through;
+}
+
+.reddit-preview {
+  background: #dae0e6;
+  border: 1px solid #c7cfd8;
+  border-radius: 8px;
+  color: #1c1c1c;
+  min-height: 100%;
+  padding: 18px;
+}
+
+.reddit-card {
+  background: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  margin: 0 auto;
+  max-width: 900px;
+  overflow: hidden;
+}
+
+.reddit-votes {
+  align-items: center;
+  background: #f8f9fa;
+  color: #878a8c;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.62rem;
+  font-weight: 700;
+  gap: 5px;
+  padding: 12px 4px;
+  text-transform: uppercase;
+}
+
+.reddit-votes strong {
+  color: #1c1c1c;
+  font-size: 0.88rem;
+}
+
+.reddit-post {
+  min-width: 0;
+  padding: 12px 14px 10px;
+}
+
+.reddit-meta {
+  color: #787c7e;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.reddit-meta span:first-child {
+  color: #1c1c1c;
+  font-weight: 700;
+}
+
+.reddit-markdown {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.48;
+}
+
+.reddit-markdown h1,
+.reddit-markdown h2,
+.reddit-markdown h3 {
+  color: #1a1a1b;
+  font-weight: 650;
+  line-height: 1.25;
+  margin: 18px 0 10px;
+}
+
+.reddit-markdown h1 {
+  font-size: 1.45rem;
+}
+
+.reddit-markdown h2 {
+  font-size: 1.22rem;
+}
+
+.reddit-markdown h3 {
+  font-size: 1.08rem;
+}
+
+.reddit-markdown p,
+.reddit-markdown ul,
+.reddit-markdown ol,
+.reddit-markdown pre,
+.reddit-markdown blockquote,
+.reddit-markdown table {
+  margin-bottom: 12px;
+  margin-top: 0;
+}
+
+.reddit-markdown a {
+  color: #0079d3;
+  text-decoration: none;
+}
+
+.reddit-markdown a:hover {
+  text-decoration: underline;
+}
+
+.reddit-markdown blockquote {
+  border-left: 4px solid #edeff1;
+  color: #4f5458;
+  padding-left: 12px;
+}
+
+.reddit-markdown code {
+  background: #f6f7f8;
+  border: 1px solid #edeff1;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 0.9em;
+  padding: 0.12em 0.32em;
+}
+
+.reddit-markdown pre {
+  background: #f6f7f8;
+  border: 1px solid #edeff1;
+  border-radius: 4px;
+  overflow: auto;
+  padding: 12px;
+}
+
+.reddit-markdown pre code {
+  background: transparent;
+  border: 0;
+  display: block;
+  line-height: 1.45;
+  padding: 0;
+}
+
+.reddit-markdown table {
+  border-collapse: collapse;
+  display: block;
+  overflow: auto;
+}
+
+.reddit-markdown th,
+.reddit-markdown td {
+  border: 1px solid #edeff1;
+  padding: 6px 9px;
+}
+
+.reddit-markdown img {
+  border-radius: 4px;
+  max-width: 100%;
+}
+
+.reddit-actions {
+  border-top: 1px solid #edeff1;
+  color: #878a8c;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  font-weight: 700;
+  gap: 16px;
+  margin-top: 14px;
+  padding-top: 10px;
+}
+
+.reddit-preview .inline-spoiler {
+  background: #1a1a1b;
+  color: transparent;
+}
+
+.reddit-preview .inline-spoiler:hover,
+.reddit-preview .inline-spoiler:focus {
+  background: #edeff1;
+  color: #1c1c1c;
+}
+
+.sr-only {
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+@media (max-width: 1100px) {
+  .command-bar {
+    flex-direction: column;
+  }
+
+  .platform-tabs {
+    width: 100%;
+  }
+
+  .toolbar {
+    justify-content: flex-start;
+  }
+
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-shell {
+    padding: 14px;
+  }
+
+  .topbar,
+  .topbar-actions,
+  .brand-cluster,
+  .workspace-meta {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .topbar {
+    gap: 14px;
+  }
+
+  .topbar-actions {
+    max-width: none;
+  }
+
+  .approximation-note {
+    text-align: left;
+  }
+
+  .platform-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .tool-button {
+    flex: 1 1 calc(50% - 8px);
+    justify-content: center;
+  }
+
+  .panel-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .panel-header span {
+    text-align: left;
+  }
+
+  .markdown-editor,
+  .preview-scroll {
+    min-height: 52vh;
+  }
+
+  .github-preview,
+  .discord-preview,
+  .reddit-preview {
+    padding: 14px;
+  }
+
+  .reddit-card {
+    grid-template-columns: 34px minmax(0, 1fr);
+  }
+
+  .discord-message {
+    gap: 10px;
+  }
+
+  .discord-avatar {
+    height: 34px;
+    width: 34px;
+  }
+}

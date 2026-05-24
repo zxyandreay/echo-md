@@ -1,0 +1,716 @@
+import {
+  Clipboard,
+  Code2,
+  Columns2,
+  FileText,
+  Moon,
+  PanelLeft,
+  PanelRight,
+  RotateCcw,
+  Sun,
+  Trash2,
+} from 'lucide-react'
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import Markdown, { type Components } from 'react-markdown'
+import remarkBreaks from 'remark-breaks'
+import remarkGfm from 'remark-gfm'
+import './App.css'
+
+type PlatformMode = 'github' | 'discord' | 'reddit'
+type ThemeMode = 'light' | 'dark'
+type LayoutMode = 'split' | 'editor' | 'preview'
+type TokenKind = 'spoiler' | 'underline' | 'strike'
+
+type PlatformOption = {
+  id: PlatformMode
+  label: string
+  description: string
+}
+
+type InlineToken = {
+  kind: TokenKind
+  text: string
+}
+
+type PreparedMarkdown = {
+  text: string
+  tokens: InlineToken[]
+}
+
+const STORAGE_KEYS = {
+  draft: 'echo-md:draft:v1',
+  platform: 'echo-md:platform:v1',
+  theme: 'echo-md:theme:v1',
+  layout: 'echo-md:layout:v1',
+} as const
+
+const SAMPLE_MARKDOWN = `# Launch checklist
+
+Write once. **Preview everywhere.** Use Echo to check the final feel before you paste.
+
+This draft includes a [project link](https://github.com/zxyandreay/echo-md), *emphasis*, **bold text**, and ~~strikethrough~~.
+
+## Tasks
+
+- [x] Draft the announcement
+- [ ] Preview it on each platform
+- [ ] Share the final copy
+
+> Markdown changes shape from app to app. Echo helps you catch the visual surprises first.
+
+Use \`npm run build\` before publishing.
+
+\`\`\`ts
+type Platform = 'GitHub' | 'Discord' | 'Reddit'
+
+const message = 'Preview before you post'
+\`\`\`
+
+| Platform | Watch for |
+| --- | --- |
+| GitHub | Tables, task lists, README spacing |
+| Discord | Chat rhythm, spoilers, code blocks |
+| Reddit | Post spacing, quotes, action rows |
+
+Discord spoiler: ||hidden launch note||
+
+Reddit spoiler: >!hidden launch note!<`
+
+const EDITOR_PLACEHOLDER = `# Start your draft
+
+Write Markdown here and Echo will preview it for each platform.
+
+- Try a list
+- Add \`inline code\`
+- Paste a table
+- Test ||Discord spoilers|| or >!Reddit spoilers!<`
+
+const PLATFORM_OPTIONS: PlatformOption[] = [
+  {
+    id: 'github',
+    label: 'GitHub',
+    description: 'README-style GFM preview',
+  },
+  {
+    id: 'discord',
+    label: 'Discord',
+    description: 'Message-style Markdown preview',
+  },
+  {
+    id: 'reddit',
+    label: 'Reddit',
+    description: 'Post/comment-style preview',
+  },
+]
+
+const layoutOptions: Array<{
+  id: LayoutMode
+  label: string
+  icon: typeof Columns2
+}> = [
+  { id: 'split', label: 'Split layout', icon: Columns2 },
+  { id: 'editor', label: 'Editor only', icon: PanelLeft },
+  { id: 'preview', label: 'Preview only', icon: PanelRight },
+]
+
+const tokenPattern = /ECHO_TOKEN_(\d+)_END/g
+
+function isPlatformMode(value: unknown): value is PlatformMode {
+  return value === 'github' || value === 'discord' || value === 'reddit'
+}
+
+function isThemeMode(value: unknown): value is ThemeMode {
+  return value === 'light' || value === 'dark'
+}
+
+function isLayoutMode(value: unknown): value is LayoutMode {
+  return value === 'split' || value === 'editor' || value === 'preview'
+}
+
+function readStorageValue<T>(
+  key: string,
+  fallback: T,
+  validate?: (value: unknown) => value is T,
+): T {
+  try {
+    const storedValue = window.localStorage.getItem(key)
+
+    if (storedValue === null) {
+      return fallback
+    }
+
+    const parsedValue = JSON.parse(storedValue) as unknown
+
+    if (validate && !validate(parsedValue)) {
+      return fallback
+    }
+
+    return parsedValue as T
+  } catch {
+    return fallback
+  }
+}
+
+function useStoredState<T>(
+  key: string,
+  fallback: T,
+  validate?: (value: unknown) => value is T,
+) {
+  const [value, setValue] = useState<T>(() =>
+    readStorageValue(key, fallback, validate),
+  )
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(key, JSON.stringify(value))
+    } catch {
+      // Local persistence is a convenience; the editor should still work.
+    }
+  }, [key, value])
+
+  return [value, setValue] as const
+}
+
+function addToken(tokens: InlineToken[], kind: TokenKind, text: string) {
+  const token = `ECHO_TOKEN_${tokens.length}_END`
+  tokens.push({ kind, text })
+  return token
+}
+
+function prepareDiscordMarkdown(markdown: string): PreparedMarkdown {
+  const tokens: InlineToken[] = []
+  const text = markdown
+    .replace(/\|\|([\s\S]+?)\|\|/g, (_, value: string) =>
+      addToken(tokens, 'spoiler', value),
+    )
+    .replace(/__([^_\n][\s\S]*?)__/g, (_, value: string) =>
+      addToken(tokens, 'underline', value),
+    )
+    .replace(/~~([\s\S]+?)~~/g, (_, value: string) =>
+      addToken(tokens, 'strike', value),
+    )
+
+  return { text, tokens }
+}
+
+function prepareRedditMarkdown(markdown: string): PreparedMarkdown {
+  const tokens: InlineToken[] = []
+  const text = markdown.replace(/>!([\s\S]+?)!</g, (_, value: string) =>
+    addToken(tokens, 'spoiler', value),
+  )
+
+  return { text, tokens }
+}
+
+function renderToken(token: InlineToken, key: string) {
+  if (token.kind === 'spoiler') {
+    return (
+      <span className="inline-spoiler" key={key}>
+        {token.text}
+      </span>
+    )
+  }
+
+  if (token.kind === 'underline') {
+    return (
+      <span className="inline-underline" key={key}>
+        {token.text}
+      </span>
+    )
+  }
+
+  return (
+    <span className="inline-strike" key={key}>
+      {token.text}
+    </span>
+  )
+}
+
+function renderTokenizedText(value: string, tokens: InlineToken[]) {
+  const pieces: ReactNode[] = []
+  let lastIndex = 0
+
+  for (const match of value.matchAll(tokenPattern)) {
+    const tokenIndex = Number(match[1])
+    const token = tokens[tokenIndex]
+
+    if (match.index === undefined || !token) {
+      continue
+    }
+
+    if (match.index > lastIndex) {
+      pieces.push(value.slice(lastIndex, match.index))
+    }
+
+    pieces.push(renderToken(token, `${token.kind}-${tokenIndex}-${match.index}`))
+    lastIndex = match.index + match[0].length
+  }
+
+  if (lastIndex < value.length) {
+    pieces.push(value.slice(lastIndex))
+  }
+
+  return pieces.length > 0 ? pieces : value
+}
+
+function renderTokenizedChildren(children: ReactNode, tokens: InlineToken[]) {
+  if (typeof children === 'string') {
+    return renderTokenizedText(children, tokens)
+  }
+
+  if (Array.isArray(children)) {
+    return children.flatMap((child, index) => {
+      if (typeof child === 'string') {
+        return renderTokenizedText(child, tokens)
+      }
+
+      return <span key={`child-${index}`}>{child}</span>
+    })
+  }
+
+  return children
+}
+
+function createTokenizedComponents(tokens: InlineToken[]): Components {
+  return {
+    a({ href, children, title }) {
+      return (
+        <a href={href} rel="noreferrer" target="_blank" title={title}>
+          {renderTokenizedChildren(children, tokens)}
+        </a>
+      )
+    },
+    blockquote({ children }) {
+      return <blockquote>{renderTokenizedChildren(children, tokens)}</blockquote>
+    },
+    h1({ children }) {
+      return <h1>{renderTokenizedChildren(children, tokens)}</h1>
+    },
+    h2({ children }) {
+      return <h2>{renderTokenizedChildren(children, tokens)}</h2>
+    },
+    h3({ children }) {
+      return <h3>{renderTokenizedChildren(children, tokens)}</h3>
+    },
+    h4({ children }) {
+      return <h4>{renderTokenizedChildren(children, tokens)}</h4>
+    },
+    li({ children }) {
+      return <li>{renderTokenizedChildren(children, tokens)}</li>
+    },
+    p({ children }) {
+      return <p>{renderTokenizedChildren(children, tokens)}</p>
+    },
+    img({ alt, src, title }) {
+      return <img alt={alt ?? ''} loading="lazy" src={src} title={title} />
+    },
+  }
+}
+
+const standardMarkdownComponents: Components = {
+  a({ href, children, title }) {
+    return (
+      <a href={href} rel="noreferrer" target="_blank" title={title}>
+        {children}
+      </a>
+    )
+  },
+  img({ alt, src, title }) {
+    return <img alt={alt ?? ''} loading="lazy" src={src} title={title} />
+  },
+}
+
+function GitHubPreview({ markdown }: { markdown: string }) {
+  if (!markdown.trim()) {
+    return <EmptyPreview platform="GitHub" />
+  }
+
+  return (
+    <div className="github-preview">
+      <article className="markdown-body">
+        <Markdown
+          components={standardMarkdownComponents}
+          remarkPlugins={[remarkGfm]}
+          skipHtml
+        >
+          {markdown}
+        </Markdown>
+      </article>
+    </div>
+  )
+}
+
+function DiscordPreview({ markdown }: { markdown: string }) {
+  const preparedMarkdown = useMemo(
+    () => prepareDiscordMarkdown(markdown),
+    [markdown],
+  )
+  const components = useMemo(
+    () => createTokenizedComponents(preparedMarkdown.tokens),
+    [preparedMarkdown.tokens],
+  )
+
+  if (!markdown.trim()) {
+    return <EmptyPreview platform="Discord" />
+  }
+
+  return (
+    <div className="discord-preview">
+      <div className="discord-message">
+        <div className="discord-avatar" aria-hidden="true">
+          E
+        </div>
+        <div className="discord-message-main">
+          <div className="discord-meta">
+            <span className="discord-name">echo.writer</span>
+            <span className="discord-time">Today at 10:24 PM</span>
+          </div>
+          <div className="discord-markdown">
+            <Markdown
+              components={components}
+              remarkPlugins={[remarkBreaks]}
+              skipHtml
+            >
+              {preparedMarkdown.text}
+            </Markdown>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function RedditPreview({ markdown }: { markdown: string }) {
+  const preparedMarkdown = useMemo(
+    () => prepareRedditMarkdown(markdown),
+    [markdown],
+  )
+  const components = useMemo(
+    () => createTokenizedComponents(preparedMarkdown.tokens),
+    [preparedMarkdown.tokens],
+  )
+
+  if (!markdown.trim()) {
+    return <EmptyPreview platform="Reddit" />
+  }
+
+  return (
+    <div className="reddit-preview">
+      <article className="reddit-card">
+        <div className="reddit-votes" aria-hidden="true">
+          <span>up</span>
+          <strong>128</strong>
+          <span>down</span>
+        </div>
+        <div className="reddit-post">
+          <div className="reddit-meta">
+            <span>r/markdown</span>
+            <span>Posted by u/echo_writer</span>
+            <span>just now</span>
+          </div>
+          <div className="reddit-markdown">
+            <Markdown
+              components={components}
+              remarkPlugins={[remarkGfm]}
+              skipHtml
+            >
+              {preparedMarkdown.text}
+            </Markdown>
+          </div>
+          <div className="reddit-actions" aria-label="Reddit action preview">
+            <span>12 Comments</span>
+            <span>Share</span>
+            <span>Save</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  )
+}
+
+function EmptyPreview({ platform }: { platform: string }) {
+  return (
+    <div className="empty-preview">
+      <FileText aria-hidden="true" size={26} strokeWidth={1.8} />
+      <h2>{platform} preview is ready</h2>
+      <p>Start writing Markdown or load the sample to see the styled preview.</p>
+    </div>
+  )
+}
+
+function PlatformPreview({
+  markdown,
+  platform,
+}: {
+  markdown: string
+  platform: PlatformMode
+}) {
+  if (platform === 'discord') {
+    return <DiscordPreview markdown={markdown} />
+  }
+
+  if (platform === 'reddit') {
+    return <RedditPreview markdown={markdown} />
+  }
+
+  return <GitHubPreview markdown={markdown} />
+}
+
+function App() {
+  const [markdown, setMarkdown] = useStoredState(
+    STORAGE_KEYS.draft,
+    SAMPLE_MARKDOWN,
+  )
+  const [platform, setPlatform] = useStoredState<PlatformMode>(
+    STORAGE_KEYS.platform,
+    'github',
+    isPlatformMode,
+  )
+  const [theme, setTheme] = useStoredState<ThemeMode>(
+    STORAGE_KEYS.theme,
+    'light',
+    isThemeMode,
+  )
+  const [layout, setLayout] = useStoredState<LayoutMode>(
+    STORAGE_KEYS.layout,
+    'split',
+    isLayoutMode,
+  )
+  const [notice, setNotice] = useState('Draft saved locally')
+  const previewRef = useRef<HTMLDivElement>(null)
+  const noticeTimerRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+  }, [theme])
+
+  useEffect(() => {
+    return () => {
+      if (noticeTimerRef.current !== null) {
+        window.clearTimeout(noticeTimerRef.current)
+      }
+    }
+  }, [])
+
+  const selectedPlatform = PLATFORM_OPTIONS.find(
+    (option) => option.id === platform,
+  )
+  const showEditor = layout !== 'preview'
+  const showPreview = layout !== 'editor'
+
+  function showNotice(message: string) {
+    setNotice(message)
+
+    if (noticeTimerRef.current !== null) {
+      window.clearTimeout(noticeTimerRef.current)
+    }
+
+    noticeTimerRef.current = window.setTimeout(() => {
+      setNotice('Draft saved locally')
+    }, 2400)
+  }
+
+  async function copyMarkdown() {
+    if (!markdown) {
+      showNotice('Nothing to copy yet')
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(markdown)
+      showNotice('Markdown copied')
+    } catch {
+      showNotice('Clipboard access was blocked')
+    }
+  }
+
+  async function copyRenderedHtml() {
+    const html = previewRef.current?.innerHTML ?? ''
+    const text = previewRef.current?.innerText ?? ''
+
+    if (!html && !text) {
+      showNotice('Nothing to copy yet')
+      return
+    }
+
+    try {
+      if (window.ClipboardItem && navigator.clipboard.write && html) {
+        const item = new ClipboardItem({
+          'text/html': new Blob([html], { type: 'text/html' }),
+          'text/plain': new Blob([text], { type: 'text/plain' }),
+        })
+
+        await navigator.clipboard.write([item])
+      } else {
+        await navigator.clipboard.writeText(text || html)
+      }
+
+      showNotice('Rendered preview copied')
+    } catch {
+      try {
+        await navigator.clipboard.writeText(text || html)
+        showNotice('Rendered text copied')
+      } catch {
+        showNotice('Clipboard access was blocked')
+      }
+    }
+  }
+
+  function clearEditor() {
+    setMarkdown('')
+    showNotice('Editor cleared')
+  }
+
+  function loadSample() {
+    setMarkdown(SAMPLE_MARKDOWN)
+    showNotice('Sample loaded')
+  }
+
+  return (
+    <main className={`app-shell theme-${theme}`}>
+      <header className="topbar">
+        <div className="brand-cluster">
+          <div className="brand-mark" aria-hidden="true">
+            E
+          </div>
+          <div>
+            <p className="brand-name">Echo</p>
+            <h1>Write once. Preview everywhere.</h1>
+            <p>Preview Markdown before you post.</p>
+          </div>
+        </div>
+
+        <div className="topbar-actions">
+          <p className="approximation-note">
+            Platform previews are approximations and may differ slightly from
+            the actual apps.
+          </p>
+          <button
+            className="icon-button"
+            onClick={() =>
+              setTheme((currentTheme) =>
+                currentTheme === 'light' ? 'dark' : 'light',
+              )
+            }
+            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
+            type="button"
+          >
+            {theme === 'light' ? (
+              <Moon aria-hidden="true" size={18} />
+            ) : (
+              <Sun aria-hidden="true" size={18} />
+            )}
+            <span className="sr-only">
+              Switch to {theme === 'light' ? 'dark' : 'light'} theme
+            </span>
+          </button>
+        </div>
+      </header>
+
+      <section className="command-bar" aria-label="Editor controls">
+        <div className="platform-tabs" role="tablist" aria-label="Preview mode">
+          {PLATFORM_OPTIONS.map((option) => (
+            <button
+              aria-selected={platform === option.id}
+              className="platform-tab"
+              key={option.id}
+              onClick={() => setPlatform(option.id)}
+              role="tab"
+              type="button"
+            >
+              <span>{option.label}</span>
+              <small>{option.description}</small>
+            </button>
+          ))}
+        </div>
+
+        <div className="toolbar">
+          <button className="tool-button" onClick={copyMarkdown} type="button">
+            <Clipboard aria-hidden="true" size={16} />
+            Copy Markdown
+          </button>
+          <button
+            className="tool-button"
+            onClick={copyRenderedHtml}
+            type="button"
+          >
+            <Code2 aria-hidden="true" size={16} />
+            Copy HTML
+          </button>
+          <button className="tool-button" onClick={loadSample} type="button">
+            <RotateCcw aria-hidden="true" size={16} />
+            Load Sample
+          </button>
+          <button className="tool-button danger" onClick={clearEditor} type="button">
+            <Trash2 aria-hidden="true" size={16} />
+            Clear
+          </button>
+        </div>
+      </section>
+
+      <section className="workspace-meta" aria-label="Workspace status">
+        <div className="layout-toggle" aria-label="Layout mode">
+          {layoutOptions.map((option) => {
+            const Icon = option.icon
+
+            return (
+              <button
+                aria-pressed={layout === option.id}
+                className="layout-button"
+                key={option.id}
+                onClick={() => setLayout(option.id)}
+                title={option.label}
+                type="button"
+              >
+                <Icon aria-hidden="true" size={16} />
+                <span className="sr-only">{option.label}</span>
+              </button>
+            )
+          })}
+        </div>
+        <p className="status-text">{notice}</p>
+      </section>
+
+      <section className={`workspace layout-${layout}`}>
+        {showEditor ? (
+          <section className="panel editor-panel" aria-labelledby="editor-title">
+            <div className="panel-header">
+              <div>
+                <p className="panel-kicker">Editor</p>
+                <h2 id="editor-title">Markdown draft</h2>
+              </div>
+              <span>{markdown.length.toLocaleString()} chars</span>
+            </div>
+            <textarea
+              aria-label="Markdown editor"
+              className="markdown-editor"
+              onChange={(event) => setMarkdown(event.target.value)}
+              placeholder={EDITOR_PLACEHOLDER}
+              spellCheck="false"
+              value={markdown}
+            />
+          </section>
+        ) : null}
+
+        {showPreview ? (
+          <section className="panel preview-panel" aria-labelledby="preview-title">
+            <div className="panel-header">
+              <div>
+                <p className="panel-kicker">Preview</p>
+                <h2 id="preview-title">
+                  {selectedPlatform?.label ?? 'GitHub'} style
+                </h2>
+              </div>
+              <span>{selectedPlatform?.description}</span>
+            </div>
+            <div className="preview-scroll" ref={previewRef}>
+              <PlatformPreview markdown={markdown} platform={platform} />
+            </div>
+          </section>
+        ) : null}
+      </section>
+    </main>
+  )
+}
+
+export default App
