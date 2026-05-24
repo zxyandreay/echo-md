@@ -140,7 +140,8 @@
 }
 
 .icon-button,
-.layout-button {
+.layout-button,
+.preview-theme-button {
   align-items: center;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -160,7 +161,8 @@
 }
 
 .icon-button:hover,
-.layout-button:hover {
+.layout-button:hover,
+.preview-theme-button:hover {
   border-color: var(--accent);
   color: var(--accent-strong);
   transform: translateY(-1px);
@@ -168,6 +170,7 @@
 
 .icon-button:focus-visible,
 .layout-button:focus-visible,
+.preview-theme-button:focus-visible,
 .tool-button:focus-visible,
 .platform-tab:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--accent) 30%, transparent);
@@ -282,6 +285,13 @@
   max-width: 1440px;
 }
 
+.workspace-controls {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .layout-toggle {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -296,6 +306,43 @@
   border-radius: 6px;
   height: 30px;
   width: 30px;
+}
+
+.preview-theme-toggle {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  gap: 4px;
+  min-height: 40px;
+  padding: 4px;
+}
+
+.preview-theme-toggle > span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 720;
+  line-height: 1;
+  padding: 0 8px 0 6px;
+  white-space: nowrap;
+}
+
+.preview-theme-button {
+  background: transparent;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 760;
+  gap: 5px;
+  height: 30px;
+  padding: 0 9px;
+  width: auto;
+}
+
+.preview-theme-button[aria-pressed='true'] {
+  background: var(--text-strong);
+  border-color: var(--text-strong);
+  color: var(--surface);
 }
 
 .layout-button[aria-pressed='true'] {
@@ -401,6 +448,10 @@
   padding: 20px;
 }
 
+.preview-scroll-dark {
+  background: #0f1418;
+}
+
 .empty-preview {
   align-items: center;
   background: var(--surface);
@@ -428,6 +479,16 @@
 .empty-preview p {
   margin: 0;
   max-width: 34ch;
+}
+
+.empty-preview.platform-preview-dark {
+  background: #0d1117;
+  border-color: #30363d;
+  color: #8b949e;
+}
+
+.empty-preview.platform-preview-dark h2 {
+  color: #e6edf3;
 }
 
 .github-preview {
@@ -573,6 +634,62 @@
   vertical-align: middle;
 }
 
+.github-preview.platform-preview-dark {
+  background: #0d1117;
+  border-color: #30363d;
+  color: #e6edf3;
+}
+
+.github-preview.platform-preview-dark .markdown-body {
+  color: #e6edf3;
+}
+
+.github-preview.platform-preview-dark .markdown-body h1,
+.github-preview.platform-preview-dark .markdown-body h2 {
+  border-bottom-color: #30363d;
+  color: #e6edf3;
+}
+
+.github-preview.platform-preview-dark .markdown-body h3 {
+  color: #e6edf3;
+}
+
+.github-preview.platform-preview-dark .markdown-body a {
+  color: #4493f8;
+}
+
+.github-preview.platform-preview-dark .markdown-body blockquote {
+  border-left-color: #3d444d;
+  color: #8b949e;
+}
+
+.github-preview.platform-preview-dark .markdown-body code {
+  background: rgb(110 118 129 / 40%);
+  color: #e6edf3;
+}
+
+.github-preview.platform-preview-dark .markdown-body pre {
+  background: #161b22;
+}
+
+.github-preview.platform-preview-dark .markdown-body tr {
+  background: #0d1117;
+  border-top-color: #30363d;
+}
+
+.github-preview.platform-preview-dark .markdown-body tr:nth-child(2n) {
+  background: #161b22;
+}
+
+.github-preview.platform-preview-dark .markdown-body th,
+.github-preview.platform-preview-dark .markdown-body td {
+  border-color: #30363d;
+}
+
+.github-preview.platform-preview-dark .markdown-body hr {
+  background: #30363d;
+}
+
 .discord-preview {
   background: #313338;
   border: 1px solid #1e1f22;
@@ -580,6 +697,12 @@
   color: #dbdee1;
   min-height: 100%;
   padding: 20px;
+}
+
+.discord-preview.platform-preview-light {
+  background: #f2f3f5;
+  border-color: #d4d7dc;
+  color: #2e3338;
 }
 
 .discord-message {
@@ -702,6 +825,48 @@
   white-space: pre;
 }
 
+.discord-preview.platform-preview-light .discord-name,
+.discord-preview.platform-preview-light .discord-markdown h1,
+.discord-preview.platform-preview-light .discord-markdown h2,
+.discord-preview.platform-preview-light .discord-markdown h3,
+.discord-preview.platform-preview-light .discord-markdown h4 {
+  color: #060607;
+}
+
+.discord-preview.platform-preview-light .discord-time {
+  color: #747f8d;
+}
+
+.discord-preview.platform-preview-light .discord-markdown {
+  color: #2e3338;
+}
+
+.discord-preview.platform-preview-light .discord-markdown a {
+  color: #0068e0;
+}
+
+.discord-preview.platform-preview-light .discord-markdown blockquote {
+  border-left-color: #c7ccd1;
+  color: #4f5660;
+}
+
+.discord-preview.platform-preview-light .discord-markdown code,
+.discord-preview.platform-preview-light .discord-markdown pre {
+  background: #e3e5e8;
+  border-color: #d4d7dc;
+  color: #2e3338;
+}
+
+.discord-preview.platform-preview-light .inline-spoiler {
+  background: #b9bbbe;
+}
+
+.discord-preview.platform-preview-light .inline-spoiler:hover,
+.discord-preview.platform-preview-light .inline-spoiler:focus {
+  background: #e3e5e8;
+  color: #2e3338;
+}
+
 .inline-spoiler {
   background: #202225;
   border-radius: 3px;
@@ -736,6 +901,12 @@
   color: #1c1c1c;
   min-height: 100%;
   padding: 18px;
+}
+
+.reddit-preview.platform-preview-dark {
+  background: #030303;
+  border-color: #343536;
+  color: #d7dadc;
 }
 
 .reddit-card {
@@ -903,6 +1074,70 @@
   color: #1c1c1c;
 }
 
+.reddit-preview.platform-preview-dark .reddit-card {
+  background: #1a1a1b;
+  border-color: #343536;
+}
+
+.reddit-preview.platform-preview-dark .reddit-votes {
+  background: #161617;
+  color: #818384;
+}
+
+.reddit-preview.platform-preview-dark .reddit-votes strong,
+.reddit-preview.platform-preview-dark .reddit-meta span:first-child,
+.reddit-preview.platform-preview-dark .reddit-markdown h1,
+.reddit-preview.platform-preview-dark .reddit-markdown h2,
+.reddit-preview.platform-preview-dark .reddit-markdown h3 {
+  color: #d7dadc;
+}
+
+.reddit-preview.platform-preview-dark .reddit-post,
+.reddit-preview.platform-preview-dark .reddit-markdown {
+  color: #d7dadc;
+}
+
+.reddit-preview.platform-preview-dark .reddit-meta,
+.reddit-preview.platform-preview-dark .reddit-actions {
+  color: #818384;
+}
+
+.reddit-preview.platform-preview-dark .reddit-markdown a {
+  color: #4fbcff;
+}
+
+.reddit-preview.platform-preview-dark .reddit-markdown blockquote {
+  border-left-color: #343536;
+  color: #a5a8aa;
+}
+
+.reddit-preview.platform-preview-dark .reddit-markdown code,
+.reddit-preview.platform-preview-dark .reddit-markdown pre {
+  background: #272729;
+  border-color: #343536;
+  color: #d7dadc;
+}
+
+.reddit-preview.platform-preview-dark .reddit-markdown th,
+.reddit-preview.platform-preview-dark .reddit-markdown td {
+  border-color: #343536;
+}
+
+.reddit-preview.platform-preview-dark .reddit-actions {
+  border-top-color: #343536;
+}
+
+.reddit-preview.platform-preview-dark .inline-spoiler {
+  background: #d7dadc;
+  color: transparent;
+}
+
+.reddit-preview.platform-preview-dark .inline-spoiler:hover,
+.reddit-preview.platform-preview-dark .inline-spoiler:focus {
+  background: #343536;
+  color: #d7dadc;
+}
+
 .sr-only {
   border: 0;
   clip: rect(0, 0, 0, 0);
@@ -941,6 +1176,7 @@
   .topbar,
   .topbar-actions,
   .brand-cluster,
+  .workspace-controls,
   .workspace-meta {
     align-items: flex-start;
     flex-direction: column;
@@ -965,6 +1201,10 @@
   .tool-button {
     flex: 1 1 calc(50% - 8px);
     justify-content: center;
+  }
+
+  .preview-theme-toggle {
+    width: 100%;
   }
 
   .panel-header {

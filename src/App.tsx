@@ -18,6 +18,7 @@ import './App.css'
 
 type PlatformMode = 'github' | 'discord' | 'reddit'
 type ThemeMode = 'light' | 'dark'
+type PreviewThemeMode = ThemeMode
 type LayoutMode = 'split' | 'editor' | 'preview'
 type TokenKind = 'spoiler' | 'underline' | 'strike'
 
@@ -41,6 +42,7 @@ const STORAGE_KEYS = {
   draft: 'echo-md:draft:v1',
   platform: 'echo-md:platform:v1',
   theme: 'echo-md:theme:v1',
+  previewTheme: 'echo-md:preview-theme:v1',
   layout: 'echo-md:layout:v1',
 } as const
 
@@ -320,13 +322,19 @@ const standardMarkdownComponents: Components = {
   },
 }
 
-function GitHubPreview({ markdown }: { markdown: string }) {
+function GitHubPreview({
+  markdown,
+  previewTheme,
+}: {
+  markdown: string
+  previewTheme: PreviewThemeMode
+}) {
   if (!markdown.trim()) {
-    return <EmptyPreview platform="GitHub" />
+    return <EmptyPreview platform="GitHub" previewTheme={previewTheme} />
   }
 
   return (
-    <div className="github-preview">
+    <div className={`github-preview platform-preview-${previewTheme}`}>
       <article className="markdown-body">
         <Markdown
           components={standardMarkdownComponents}
@@ -340,7 +348,13 @@ function GitHubPreview({ markdown }: { markdown: string }) {
   )
 }
 
-function DiscordPreview({ markdown }: { markdown: string }) {
+function DiscordPreview({
+  markdown,
+  previewTheme,
+}: {
+  markdown: string
+  previewTheme: PreviewThemeMode
+}) {
   const preparedMarkdown = useMemo(
     () => prepareDiscordMarkdown(markdown),
     [markdown],
@@ -351,11 +365,11 @@ function DiscordPreview({ markdown }: { markdown: string }) {
   )
 
   if (!markdown.trim()) {
-    return <EmptyPreview platform="Discord" />
+    return <EmptyPreview platform="Discord" previewTheme={previewTheme} />
   }
 
   return (
-    <div className="discord-preview">
+    <div className={`discord-preview platform-preview-${previewTheme}`}>
       <div className="discord-message">
         <div className="discord-avatar" aria-hidden="true">
           E
@@ -380,7 +394,13 @@ function DiscordPreview({ markdown }: { markdown: string }) {
   )
 }
 
-function RedditPreview({ markdown }: { markdown: string }) {
+function RedditPreview({
+  markdown,
+  previewTheme,
+}: {
+  markdown: string
+  previewTheme: PreviewThemeMode
+}) {
   const preparedMarkdown = useMemo(
     () => prepareRedditMarkdown(markdown),
     [markdown],
@@ -391,11 +411,11 @@ function RedditPreview({ markdown }: { markdown: string }) {
   )
 
   if (!markdown.trim()) {
-    return <EmptyPreview platform="Reddit" />
+    return <EmptyPreview platform="Reddit" previewTheme={previewTheme} />
   }
 
   return (
-    <div className="reddit-preview">
+    <div className={`reddit-preview platform-preview-${previewTheme}`}>
       <article className="reddit-card">
         <div className="reddit-votes" aria-hidden="true">
           <span>up</span>
@@ -428,9 +448,15 @@ function RedditPreview({ markdown }: { markdown: string }) {
   )
 }
 
-function EmptyPreview({ platform }: { platform: string }) {
+function EmptyPreview({
+  platform,
+  previewTheme,
+}: {
+  platform: string
+  previewTheme: PreviewThemeMode
+}) {
   return (
-    <div className="empty-preview">
+    <div className={`empty-preview platform-preview-${previewTheme}`}>
       <FileText aria-hidden="true" size={26} strokeWidth={1.8} />
       <h2>{platform} preview is ready</h2>
       <p>Start writing Markdown or load the sample to see the styled preview.</p>
@@ -441,19 +467,21 @@ function EmptyPreview({ platform }: { platform: string }) {
 function PlatformPreview({
   markdown,
   platform,
+  previewTheme,
 }: {
   markdown: string
   platform: PlatformMode
+  previewTheme: PreviewThemeMode
 }) {
   if (platform === 'discord') {
-    return <DiscordPreview markdown={markdown} />
+    return <DiscordPreview markdown={markdown} previewTheme={previewTheme} />
   }
 
   if (platform === 'reddit') {
-    return <RedditPreview markdown={markdown} />
+    return <RedditPreview markdown={markdown} previewTheme={previewTheme} />
   }
 
-  return <GitHubPreview markdown={markdown} />
+  return <GitHubPreview markdown={markdown} previewTheme={previewTheme} />
 }
 
 function App() {
@@ -468,6 +496,11 @@ function App() {
   )
   const [theme, setTheme] = useStoredState<ThemeMode>(
     STORAGE_KEYS.theme,
+    'light',
+    isThemeMode,
+  )
+  const [previewTheme, setPreviewTheme] = useStoredState<PreviewThemeMode>(
+    STORAGE_KEYS.previewTheme,
     'light',
     isThemeMode,
   )
@@ -649,24 +682,50 @@ function App() {
       </section>
 
       <section className="workspace-meta" aria-label="Workspace status">
-        <div className="layout-toggle" aria-label="Layout mode">
-          {layoutOptions.map((option) => {
-            const Icon = option.icon
+        <div className="workspace-controls">
+          <div className="layout-toggle" aria-label="Layout mode">
+            {layoutOptions.map((option) => {
+              const Icon = option.icon
 
-            return (
-              <button
-                aria-pressed={layout === option.id}
-                className="layout-button"
-                key={option.id}
-                onClick={() => setLayout(option.id)}
-                title={option.label}
-                type="button"
-              >
-                <Icon aria-hidden="true" size={16} />
-                <span className="sr-only">{option.label}</span>
-              </button>
-            )
-          })}
+              return (
+                <button
+                  aria-pressed={layout === option.id}
+                  className="layout-button"
+                  key={option.id}
+                  onClick={() => setLayout(option.id)}
+                  title={option.label}
+                  type="button"
+                >
+                  <Icon aria-hidden="true" size={16} />
+                  <span className="sr-only">{option.label}</span>
+                </button>
+              )
+            })}
+          </div>
+
+          <div className="preview-theme-toggle" aria-label="Platform preview theme">
+            <span>Preview theme</span>
+            <button
+              aria-pressed={previewTheme === 'light'}
+              className="preview-theme-button"
+              onClick={() => setPreviewTheme('light')}
+              title="Use light platform preview"
+              type="button"
+            >
+              <Sun aria-hidden="true" size={15} />
+              Light
+            </button>
+            <button
+              aria-pressed={previewTheme === 'dark'}
+              className="preview-theme-button"
+              onClick={() => setPreviewTheme('dark')}
+              title="Use dark platform preview"
+              type="button"
+            >
+              <Moon aria-hidden="true" size={15} />
+              Dark
+            </button>
+          </div>
         </div>
         <p className="status-text">{notice}</p>
       </section>
@@ -703,8 +762,15 @@ function App() {
               </div>
               <span>{selectedPlatform?.description}</span>
             </div>
-            <div className="preview-scroll" ref={previewRef}>
-              <PlatformPreview markdown={markdown} platform={platform} />
+            <div
+              className={`preview-scroll preview-scroll-${previewTheme}`}
+              ref={previewRef}
+            >
+              <PlatformPreview
+                markdown={markdown}
+                platform={platform}
+                previewTheme={previewTheme}
+              />
             </div>
           </section>
         ) : null}

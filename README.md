@@ -13,7 +13,8 @@ Live demo: <https://zxyandreay.github.io/echo-md/>
 - GitHub-style GFM rendering for headings, links, code, tables, task lists, images, and strikethrough.
 - Discord-style message preview with dark chat styling, code blocks, quotes, underline, strikethrough, and `||spoiler||` support.
 - Reddit-style post/comment preview with vote/action chrome, links, quotes, lists, code, and `>!spoiler!<` support.
-- Copy Markdown, copy rendered HTML/text, clear editor, load sample, layout switching, and light/dark app theme.
+- Independent light/dark controls for the Echo app shell and the platform preview theme.
+- Copy Markdown, copy rendered HTML/text, clear editor, load sample, and layout switching.
 - Fully static app with no backend, database, authentication, or paid APIs.
 
 Platform previews are approximations and may differ slightly from the actual apps.
