@@ -1,7 +1,9 @@
 import {
+  Check,
   Clipboard,
   Code2,
   Columns2,
+  Copy,
   FileText,
   Moon,
   PanelLeft,
@@ -10,7 +12,14 @@ import {
   Sun,
   Trash2,
 } from 'lucide-react'
-import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  type ReactNode,
+  isValidElement,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import Markdown, { type Components } from 'react-markdown'
 import remarkBreaks from 'remark-breaks'
 import remarkGfm from 'remark-gfm'
@@ -21,6 +30,7 @@ type ThemeMode = 'light' | 'dark'
 type PreviewThemeMode = ThemeMode
 type LayoutMode = 'split' | 'editor' | 'preview'
 type TokenKind = 'spoiler' | 'underline' | 'strike'
+type CodeCopyVariant = 'github' | 'discord'
 
 type PlatformOption = {
   id: PlatformMode
@@ -273,35 +283,137 @@ function renderTokenizedChildren(children: ReactNode, tokens: InlineToken[]) {
   return children
 }
 
-function createTokenizedComponents(tokens: InlineToken[]): Components {
+function extractTextFromReactNode(node: ReactNode): string {
+  if (typeof node === 'string' || typeof node === 'number') {
+    return String(node)
+  }
+
+  if (Array.isArray(node)) {
+    return node.map(extractTextFromReactNode).join('')
+  }
+
+  if (isValidElement<{ children?: ReactNode }>(node)) {
+    return extractTextFromReactNode(node.props.children)
+  }
+
+  return ''
+}
+
+function PlatformCodeBlock({
+  children,
+  code,
+  variant,
+}: {
+  children: ReactNode
+  code: string
+  variant: CodeCopyVariant
+}) {
+  const [copied, setCopied] = useState(false)
+  const resetTimerRef = useRef<number | null>(null)
+  const label = copied ? 'Copied' : 'Copy'
+  const Icon = copied ? Check : Copy
+
+  useEffect(() => {
+    return () => {
+      if (resetTimerRef.current !== null) {
+        window.clearTimeout(resetTimerRef.current)
+      }
+    }
+  }, [])
+
+  async function copyCode() {
+    if (!code) {
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(code)
+      setCopied(true)
+
+      if (resetTimerRef.current !== null) {
+        window.clearTimeout(resetTimerRef.current)
+      }
+
+      resetTimerRef.current = window.setTimeout(() => {
+        setCopied(false)
+      }, 1800)
+    } catch {
+      setCopied(false)
+    }
+  }
+
+  return (
+    <div className={`preview-code-block preview-code-block-${variant}`}>
+      <button
+        aria-label={`${label} code block`}
+        className="code-copy-button"
+        data-copied={copied}
+        data-render-control
+        onClick={copyCode}
+        title={`${label} code`}
+        type="button"
+      >
+        <Icon aria-hidden="true" size={15} />
+        <span className="code-copy-label">{label}</span>
+      </button>
+      <pre>{children}</pre>
+    </div>
+  )
+}
+
+function renderPlatformChildren(children: ReactNode, tokens?: InlineToken[]) {
+  return tokens ? renderTokenizedChildren(children, tokens) : children
+}
+
+function createMarkdownComponents({
+  codeCopyVariant,
+  tokens,
+}: {
+  codeCopyVariant?: CodeCopyVariant
+  tokens?: InlineToken[]
+} = {}): Components {
   return {
     a({ href, children, title }) {
       return (
         <a href={href} rel="noreferrer" target="_blank" title={title}>
-          {renderTokenizedChildren(children, tokens)}
+          {renderPlatformChildren(children, tokens)}
         </a>
       )
     },
     blockquote({ children }) {
-      return <blockquote>{renderTokenizedChildren(children, tokens)}</blockquote>
+      return <blockquote>{renderPlatformChildren(children, tokens)}</blockquote>
     },
     h1({ children }) {
-      return <h1>{renderTokenizedChildren(children, tokens)}</h1>
+      return <h1>{renderPlatformChildren(children, tokens)}</h1>
     },
     h2({ children }) {
-      return <h2>{renderTokenizedChildren(children, tokens)}</h2>
+      return <h2>{renderPlatformChildren(children, tokens)}</h2>
     },
     h3({ children }) {
-      return <h3>{renderTokenizedChildren(children, tokens)}</h3>
+      return <h3>{renderPlatformChildren(children, tokens)}</h3>
     },
     h4({ children }) {
-      return <h4>{renderTokenizedChildren(children, tokens)}</h4>
+      return <h4>{renderPlatformChildren(children, tokens)}</h4>
     },
     li({ children }) {
-      return <li>{renderTokenizedChildren(children, tokens)}</li>
+      return <li>{renderPlatformChildren(children, tokens)}</li>
     },
     p({ children }) {
-      return <p>{renderTokenizedChildren(children, tokens)}</p>
+      return <p>{renderPlatformChildren(children, tokens)}</p>
+    },
+    pre({ children }) {
+      if (!codeCopyVariant) {
+        return <pre>{children}</pre>
+      }
+
+      return (
+        <PlatformCodeBlock
+          code={extractTextFromReactNode(children).replace(/\n$/, '')}
+          variant={codeCopyVariant}
+        >
+          {children}
+        </PlatformCodeBlock>
+      )
     },
     img({ alt, src, title }) {
       return <img alt={alt ?? ''} loading="lazy" src={src} title={title} />
@@ -309,18 +421,9 @@ function createTokenizedComponents(tokens: InlineToken[]): Components {
   }
 }
 
-const standardMarkdownComponents: Components = {
-  a({ href, children, title }) {
-    return (
-      <a href={href} rel="noreferrer" target="_blank" title={title}>
-        {children}
-      </a>
-    )
-  },
-  img({ alt, src, title }) {
-    return <img alt={alt ?? ''} loading="lazy" src={src} title={title} />
-  },
-}
+const githubMarkdownComponents = createMarkdownComponents({
+  codeCopyVariant: 'github',
+})
 
 function GitHubPreview({
   markdown,
@@ -337,7 +440,7 @@ function GitHubPreview({
     <div className={`github-preview platform-preview-${previewTheme}`}>
       <article className="markdown-body">
         <Markdown
-          components={standardMarkdownComponents}
+          components={githubMarkdownComponents}
           remarkPlugins={[remarkGfm]}
           skipHtml
         >
@@ -360,7 +463,11 @@ function DiscordPreview({
     [markdown],
   )
   const components = useMemo(
-    () => createTokenizedComponents(preparedMarkdown.tokens),
+    () =>
+      createMarkdownComponents({
+        codeCopyVariant: 'discord',
+        tokens: preparedMarkdown.tokens,
+      }),
     [preparedMarkdown.tokens],
   )
 
@@ -406,7 +513,7 @@ function RedditPreview({
     [markdown],
   )
   const components = useMemo(
-    () => createTokenizedComponents(preparedMarkdown.tokens),
+    () => createMarkdownComponents({ tokens: preparedMarkdown.tokens }),
     [preparedMarkdown.tokens],
   )
 
@@ -558,8 +665,16 @@ function App() {
   }
 
   async function copyRenderedHtml() {
-    const html = previewRef.current?.innerHTML ?? ''
-    const text = previewRef.current?.innerText ?? ''
+    const previewClone = previewRef.current?.cloneNode(true) as
+      | HTMLElement
+      | undefined
+
+    previewClone
+      ?.querySelectorAll('[data-render-control]')
+      .forEach((element) => element.remove())
+
+    const html = previewClone?.innerHTML ?? ''
+    const text = previewClone?.innerText ?? ''
 
     if (!html && !text) {
       showNotice('Nothing to copy yet')

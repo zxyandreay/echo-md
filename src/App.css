@@ -359,6 +359,8 @@
 }
 
 .workspace {
+  --workspace-pane-height: clamp(440px, calc(100vh - 300px), 760px);
+  align-items: stretch;
   display: grid;
   gap: 18px;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.03fr);
@@ -368,6 +370,7 @@
 
 .workspace.layout-editor,
 .workspace.layout-preview {
+  --workspace-pane-height: clamp(520px, calc(100vh - 300px), 860px);
   grid-template-columns: minmax(0, 1fr);
 }
 
@@ -376,6 +379,9 @@
   border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   min-width: 0;
   overflow: hidden;
 }
@@ -385,6 +391,7 @@
   background: var(--surface-strong);
   border-bottom: 1px solid var(--border);
   display: flex;
+  flex: 0 0 auto;
   gap: 16px;
   justify-content: space-between;
   min-height: 64px;
@@ -426,13 +433,18 @@
   border: 0;
   color: var(--text);
   display: block;
+  flex: 1 1 auto;
   font-family: var(--mono);
   font-size: 0.95rem;
+  height: var(--workspace-pane-height);
   line-height: 1.62;
-  min-height: min(68vh, 760px);
+  min-height: 0;
   outline: none;
+  overflow: auto;
+  overscroll-behavior: contain;
   padding: 20px;
-  resize: vertical;
+  resize: none;
+  scrollbar-gutter: stable;
   tab-size: 2;
   width: 100%;
 }
@@ -443,9 +455,13 @@
 
 .preview-scroll {
   background: var(--bg-soft);
-  min-height: min(68vh, 760px);
+  flex: 1 1 auto;
+  height: var(--workspace-pane-height);
+  min-height: 0;
   overflow: auto;
+  overscroll-behavior: contain;
   padding: 20px;
+  scrollbar-gutter: stable;
 }
 
 .preview-scroll-dark {
@@ -593,6 +609,80 @@
   padding: 0;
 }
 
+.preview-code-block {
+  position: relative;
+}
+
+.markdown-body .preview-code-block {
+  margin: 0 0 16px;
+}
+
+.markdown-body .preview-code-block pre {
+  margin: 0;
+  padding-right: 56px;
+}
+
+.code-copy-button {
+  align-items: center;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: inherit;
+  justify-content: center;
+  position: absolute;
+  transition:
+    background 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease,
+    opacity 140ms ease,
+    transform 140ms ease;
+  z-index: 2;
+}
+
+.preview-code-block .code-copy-button {
+  opacity: 0;
+}
+
+.preview-code-block:hover .code-copy-button,
+.preview-code-block .code-copy-button:focus-visible,
+.preview-code-block .code-copy-button[data-copied='true'] {
+  opacity: 1;
+}
+
+.code-copy-button:focus-visible {
+  outline: 3px solid rgb(9 105 218 / 24%);
+  outline-offset: 2px;
+}
+
+.preview-code-block-github .code-copy-button {
+  background: #ffffff;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  color: #57606a;
+  height: 32px;
+  right: 8px;
+  top: 8px;
+  width: 32px;
+}
+
+.preview-code-block-github .code-copy-button:hover,
+.preview-code-block-github .code-copy-button[data-copied='true'] {
+  background: #f3f4f6;
+  border-color: #8c959f;
+  color: #24292f;
+}
+
+.preview-code-block-github .code-copy-label {
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
 .markdown-body table {
   border-collapse: collapse;
   display: block;
@@ -670,6 +760,21 @@
 
 .github-preview.platform-preview-dark .markdown-body pre {
   background: #161b22;
+}
+
+.github-preview.platform-preview-dark .preview-code-block-github .code-copy-button {
+  background: #21262d;
+  border-color: #30363d;
+  color: #8b949e;
+}
+
+.github-preview.platform-preview-dark .preview-code-block-github .code-copy-button:hover,
+.github-preview.platform-preview-dark
+  .preview-code-block-github
+  .code-copy-button[data-copied='true'] {
+  background: #30363d;
+  border-color: #8b949e;
+  color: #e6edf3;
 }
 
 .github-preview.platform-preview-dark .markdown-body tr {
@@ -818,6 +923,36 @@
   padding: 0;
 }
 
+.discord-markdown .preview-code-block {
+  margin: 0 0 10px;
+}
+
+.discord-markdown .preview-code-block pre {
+  margin: 0;
+  padding-right: 72px;
+}
+
+.preview-code-block-discord .code-copy-button {
+  background: #4e5058;
+  border: 1px solid #5c5f66;
+  border-radius: 4px;
+  color: #f2f3f5;
+  font-size: 0.72rem;
+  font-weight: 700;
+  gap: 5px;
+  min-height: 28px;
+  padding: 0 8px;
+  right: 7px;
+  top: 7px;
+}
+
+.preview-code-block-discord .code-copy-button:hover,
+.preview-code-block-discord .code-copy-button[data-copied='true'] {
+  background: #5865f2;
+  border-color: #5865f2;
+  color: #ffffff;
+}
+
 .discord-markdown table {
   display: block;
   font-family: var(--mono);
@@ -855,6 +990,25 @@
   background: #e3e5e8;
   border-color: #d4d7dc;
   color: #2e3338;
+}
+
+.discord-preview.platform-preview-light
+  .preview-code-block-discord
+  .code-copy-button {
+  background: #ffffff;
+  border-color: #c7ccd1;
+  color: #4f5660;
+}
+
+.discord-preview.platform-preview-light
+  .preview-code-block-discord
+  .code-copy-button:hover,
+.discord-preview.platform-preview-light
+  .preview-code-block-discord
+  .code-copy-button[data-copied='true'] {
+  background: #5865f2;
+  border-color: #5865f2;
+  color: #ffffff;
 }
 
 .discord-preview.platform-preview-light .inline-spoiler {
@@ -1173,6 +1327,10 @@
     padding: 14px;
   }
 
+  .workspace {
+    --workspace-pane-height: min(62vh, 620px);
+  }
+
   .topbar,
   .topbar-actions,
   .brand-cluster,
@@ -1215,11 +1373,6 @@
 
   .panel-header span {
     text-align: left;
-  }
-
-  .markdown-editor,
-  .preview-scroll {
-    min-height: 52vh;
   }
 
   .github-preview,
