@@ -121,8 +121,8 @@ const layoutOptions: Array<{
   icon: typeof Columns2
 }> = [
   { id: 'split', label: 'Split layout', icon: Columns2 },
-  { id: 'editor', label: 'Editor only', icon: PanelLeft },
-  { id: 'preview', label: 'Preview only', icon: PanelRight },
+  { id: 'editor', label: 'Editor only', icon: PanelRight },
+  { id: 'preview', label: 'Preview only', icon: PanelLeft },
 ]
 
 const tokenPattern = /ECHO_TOKEN_(\d+)_END/g
