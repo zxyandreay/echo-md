@@ -762,6 +762,10 @@
   background: #161b22;
 }
 
+.github-preview.platform-preview-dark .markdown-body pre code {
+  background: transparent;
+}
+
 .github-preview.platform-preview-dark .preview-code-block-github .code-copy-button {
   background: #21262d;
   border-color: #30363d;
