@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local Git helper scripts
+/commit-and-push.bat
+/restore-commit.bat
